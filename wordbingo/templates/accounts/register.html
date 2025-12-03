@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Crear cuenta | Bingo de Palabras</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #4f46e5, #111827);
+      color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: rgba(17, 24, 39, 0.95);
+      border-radius: 16px;
+      padding: 32px 40px;
+      width: 90%;
+      max-width: 460px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.6rem;
+      text-align: center;
+    }
+    p.subtitle {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    label {
+      font-size: 0.85rem;
+      color: #e5e7eb;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #4b5563;
+      background: #020617;
+      color: #f9fafb;
+      font-size: 0.95rem;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px #6366f1;
+    }
+    .btn {
+      margin-top: 8px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: none;
+      background: #22c55e;
+      color: #022c22;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn:hover {
+      filter: brightness(1.05);
+    }
+    .bottom-text {
+      margin-top: 16px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #9ca3af;
+    }
+    .bottom-text a {
+      color: #a5b4fc;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .bottom-text a:hover {
+      text-decoration: underline;
+    }
+    .errorlist {
+      list-style: none;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(220, 38, 38, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.6);
+      color: #fecaca;
+      margin: 4px 0 0 0;
+      font-size: 0.8rem;
+    }
+    .helptext {
+      display: block;
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Crear cuenta</h1>
+    <p class="subtitle">Regístrate para poder entrar a la sala y jugar al Bingo de Palabras.</p>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div>
+        <label for="{{ form.username.id_for_label }}">Usuario</label>
+        {{ form.username }}
+        {% if form.username.help_text %}
+          <span class="helptext">{{ form.username.help_text|safe }}</span>
+        {% endif %}
+        {% if form.username.errors %}
+          <ul class="errorlist">
+            {% for error in form.username.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.email.id_for_label }}">Correo electrónico</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <ul class="errorlist">
+            {% for error in form.email.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.password1.id_for_label }}">Contraseña</label>
+        {{ form.password1 }}
+        {% if form.password1.help_text %}
+          <span class="helptext">{{ form.password1.help_text|safe }}</span>
+        {% endif %}
+        {% if form.password1.errors %}
+          <ul class="errorlist">
+            {% for error in form.password1.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <div>
+        <label for="{{ form.password2.id_for_label }}">Repite la contraseña</label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+          <ul class="errorlist">
+            {% for error in form.password2.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn">Crear cuenta</button>
+    </form>
+
+    <div class="bottom-text">
+      ¿Ya tienes cuenta?
+      <a href="{% url 'accounts:login' %}">Inicia sesión</a>
+      <br>
+      <a href="{% url 'home' %}">← Volver a inicio</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lobby | Bingo de Palabras</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #4f46e5, #111827);
+      color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: rgba(17, 24, 39, 0.95);
+      border-radius: 16px;
+      padding: 32px 40px;
+      width: 90%;
+      max-width: 520px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+      text-align: center;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.8rem;
+    }
+    p {
+      color: #d1d5db;
+      font-size: 0.95rem;
+    }
+    .username {
+      font-weight: 600;
+      color: #a5b4fc;
+    }
+    .buttons {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 0.95rem;
+    }
+    .btn-primary {
+      background: #22c55e;
+      color: #022c22;
+    }
+    .btn-secondary {
+      background: transparent;
+      color: #e5e7eb;
+      border: 1px solid #4b5563;
+    }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+    .footer {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .footer a {
+      color: #fca5a5;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Lobby</h1>
+    <p>
+      Hola <span class="username">{{ request.user.username }}</span>, este es el lobby del
+      <strong>Bingo de Palabras</strong>.
+    </p>
+    <p>
+      Cuando todos estén listos, podéis entrar a la sala de espera para iniciar la partida.
+      Más adelante aquí aparecerán las salas creadas y las opciones para unirse.
+    </p>
+
+    <div class="buttons">
+      <!-- Por ahora usamos una única sala de espera -->
+      <a href="{% url 'bingo:waiting_room' %}" class="btn btn-primary">
+        Unirme a la sala de espera
+      </a>
+
+      <!-- Botón “futuro” para crear salas -->
+      <button class="btn btn-secondary" type="button" disabled>
+        Crear nueva sala (pronto)
+      </button>
+    </div>
+
+    <div class="footer">
+      <a href="{% url 'home' %}">← Volver al inicio</a> ·
+      <a href="{% url 'accounts:logout' %}">Cerrar sesión</a>
+    </div>
+  </div>
+</body>
+</html>

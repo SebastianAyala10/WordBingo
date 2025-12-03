@@ -1,0 +1,334 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Partida | Bingo de Palabras</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #4f46e5, #111827);
+      color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: rgba(17, 24, 39, 0.95);
+      border-radius: 16px;
+      padding: 32px 40px;
+      width: 90%;
+      max-width: 1000px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.45);
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 1.8rem;
+      text-align: center;
+    }
+    .room-name {
+      text-align: center;
+      color: #9ca3af;
+      font-size: 0.9rem;
+      margin-top: -6px;
+      margin-bottom: 18px;
+    }
+
+    /* Palabra actual arriba */
+    .current-word-box {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .current-label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .current-word {
+      margin-top: 6px;
+      font-size: 2.6rem;
+      font-weight: 800;
+      text-shadow: 0 0 18px rgba(129, 140, 248, 0.65);
+    }
+    .current-word.pop {
+      animation: pop 0.32s ease-out, glow 1.4s ease-out;
+    }
+    @keyframes pop {
+      0%   { transform: scale(0.7); opacity: 0; }
+      70%  { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    @keyframes glow {
+      0%   { text-shadow: 0 0 22px rgba(129, 140, 248, 0.9); }
+      100% { text-shadow: 0 0 8px rgba(129, 140, 248, 0.4); }
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 24px;
+      align-items: flex-start;
+    }
+    .board {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 16px;
+      padding: 18px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+    .board-title {
+      text-align: center;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    .bingo-header {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 700;
+      letter-spacing: .15em;
+      font-size: 1rem;
+      color: #a5b4fc;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+    .cell {
+      border-radius: 12px;
+      padding: 12px 6px;
+      text-align: center;
+      cursor: pointer;
+      background: #020617;
+      border: 1px solid #374151;
+      font-weight: 600;
+      font-size: 0.85rem;
+      user-select: none;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cell:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    }
+    .cell.marked {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #022c22;
+      border-color: #22c55e;
+      text-decoration: line-through;
+    }
+    .sidebar {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 16px;
+      padding: 18px 18px 22px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+    .label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .called-list {
+      margin-top: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 10px 12px;
+      font-size: 0.9rem;
+    }
+    .called-item {
+      padding: 2px 0;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+    .called-item:last-child {
+      border-bottom: none;
+    }
+    .btn {
+      margin-top: 14px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .btn-primary {
+      background: #22c55e;
+      color: #022c22;
+      width: 100%;
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .footer a {
+      color: #a5b4fc;
+      text-decoration: none;
+    }
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Partida en {{ room.name }}</h1>
+    <p class="room-name">Sala ID {{ room.id }}</p>
+
+    <!-- Palabra actual arriba -->
+    <div class="current-word-box">
+      <div class="current-label">PALABRA ACTUAL</div>
+      <div class="current-word" id="current-word">...</div>
+    </div>
+
+    <div class="layout">
+      <!-- CARTÓN 5x5 -->
+      <div class="board">
+        <div class="board-title">Tu cartón de palabras</div>
+        <div class="bingo-header">
+          <div>B</div><div>I</div><div>N</div><div>G</div><div>O</div>
+        </div>
+        <div class="grid" id="bingo-grid">
+          {% for row in card.rows %}
+            {% for word in row %}
+              <div class="cell" data-word="{{ word }}">{{ word }}</div>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- LADO DERECHO: LISTA DE PALABRAS CANTADAS -->
+      <div class="sidebar">
+        <div class="label">Palabras cantadas</div>
+        <div class="called-list" id="called-list"></div>
+
+        <button id="next-word-btn" class="btn btn-primary">
+          Siguiente palabra
+        </button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <a href="{% url 'bingo:waiting_room' %}">← Volver a la sala de espera</a> ·
+      <a href="{% url 'bingo:lobby' %}">Volver al lobby</a> ·
+      <a href="{% url 'bingo:finish_game' room.id %}">Finalizar partida</a>
+    </div>
+  </div>
+
+  <!-- Sonidos -->
+  <audio id="sound-next" src="{% static 'bingo/next.mp3' %}"></audio>
+  <audio id="sound-mark" src="{% static 'bingo/mark.mp3' %}"></audio>
+
+  <script>
+    const roomId = "{{ room.id }}";
+
+    // Obtener CSRF para el POST
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+    const csrftoken = getCookie("csrftoken");
+
+    const soundNext = document.getElementById("sound-next");
+    const soundMark = document.getElementById("sound-mark");
+
+    function playSound(audioEl) {
+      if (!audioEl) return;
+      try {
+        audioEl.currentTime = 0;
+        audioEl.play();
+      } catch (e) {
+        // Algunos navegadores bloquean sonido hasta que el usuario interactúe.
+        // No hacemos nada si falla.
+      }
+    }
+
+    // Toggle de casillas + sonido
+    document.querySelectorAll(".cell").forEach(cell => {
+      cell.addEventListener("click", () => {
+        cell.classList.toggle("marked");
+        playSound(soundMark);
+      });
+    });
+
+    let lastRenderedWord = null;
+
+    async function fetchGameState() {
+      try {
+        const res = await fetch(`/bingo/game/${roomId}/state/`);
+        const data = await res.json();
+
+        const currentWordEl = document.getElementById("current-word");
+        const calledListEl = document.getElementById("called-list");
+        const btn = document.getElementById("next-word-btn");
+
+        if (data.last_word && data.last_word !== lastRenderedWord) {
+          currentWordEl.textContent = data.last_word;
+          currentWordEl.classList.remove("pop");
+          void currentWordEl.offsetWidth; // reinicia la animación
+          currentWordEl.classList.add("pop");
+          lastRenderedWord = data.last_word;
+          playSound(soundNext);
+        } else if (!data.last_word) {
+          currentWordEl.textContent = "...";
+        }
+
+        calledListEl.innerHTML = "";
+        data.called_words.forEach(w => {
+          const div = document.createElement("div");
+          div.className = "called-item";
+          div.textContent = w;
+          calledListEl.appendChild(div);
+        });
+
+        if (data.status !== "running") {
+          btn.disabled = true;
+          btn.textContent = "Partida no activa";
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    async function callNextWord() {
+      try {
+        const res = await fetch(`/bingo/game/${roomId}/call/`, {
+          method: "POST",
+          headers: { "X-CSRFToken": csrftoken },
+        });
+        const data = await res.json();
+        if (data.finished) {
+          const btn = document.getElementById("next-word-btn");
+          btn.disabled = true;
+          btn.textContent = "No hay más palabras";
+        }
+        fetchGameState();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.getElementById("next-word-btn").addEventListener("click", callNextWord);
+
+    // Primera carga + refresco periódico
+    fetchGameState();
+    setInterval(fetchGameState, 2000);
+  </script>
+</body>
+</html>
